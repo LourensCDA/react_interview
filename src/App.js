@@ -1,4 +1,7 @@
-import logo from "./logo.svg";
+import React, { useState, useEffect } from 'react';
+import TodoList from "./components/TodoList";
+import TodoForm from "./components/TodoForm";
+import styled from "styled-components";
 import "./App.css";
 
 // 1. Create a new React component called "TodoList" that renders a list of to-do items.
@@ -25,24 +28,94 @@ import "./App.css";
 
 // Good luck with the test!
 
+const Container = styled.div`
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: lightblue;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0;
+`;
+
 function App() {
+  const [todos, setTodos] = useState([]);
+
+  useEffect(() => {
+    const storedTodos = JSON.parse(localStorage.getItem("todos"));
+    if (storedTodos) {
+      setTodos(storedTodos);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  const addTodo = (text) => {
+    const newTodo = {
+      id: todos.length + 1,
+      text: text,
+      completed: false
+    };
+    setTodos([...todos, newTodo]);
+  };
+
+  const toggleTodo = (id) => {
+    const updatedTodos = todos.map(todo => {
+      if (todo.id === id) {
+        return { ...todo, completed: !todo.completed };
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+  };
+
+  const deleteTodo = (id) => {
+    const updatedTodos = todos.filter(todo => todo.id !== id);
+    setTodos(updatedTodos);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer">
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Title>Todo List</Title>
+      <TodoFormContainer>
+        <TodoForm onAddTodo={addTodo} />
+      </TodoFormContainer>
+      <TodoList todos={todos} onToggleTodo={toggleTodo} onDeleteTodo={deleteTodo} />
+    </Container>
   );
 }
+
+const TodoFormContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  input {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #FFF;
+    width: 165px;
+  }
+
+  button {
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px;
+    margin-right: 0px;
+    background-color: #0066FF;
+    color: #FFF;
+    border: 2px solid #0066FF;
+  }
+
+  button:hover {
+    background-color: #003399;
+    border: 2px solid #003399;
+    cursor: pointer;
+  }
+`;
 
 export default App;
